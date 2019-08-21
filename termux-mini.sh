@@ -22,29 +22,35 @@ fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
 
-if [ -z $1 ]
-	then
+case $1 in
+	connect)
 		printf "Connecting to SSH...\r"
 		eval $PHONE_SSH
-else
-	if [ $1 == "cp-set" ]
-		then eval "$PHONE_SSH termux-clipboard-set '$2'" &
-	elif [ $1 == "cp-get" ]
-		then $PHONE_SSH termux-clipboard-get
-	elif [ $1 == "pull" ]
-		then scp -P 8022 -i $PHONE_KEY $PHONE_IP:$2 $3
-	elif [ $1 == "push" ]
-		then scp -P 8022 -i $PHONE_KEY $2 $PHONE_IP:$3
-	elif [ $1 == "share" ]
-		then
-			eval "$PHONE_SSH rm -rf ./tmp/*"
-			scp -P 8022 -i $PHONE_KEY $2 $PHONE_IP:./tmp/
-			eval "$PHONE_SSH termux-share -a send ./tmp/*"
-	elif [ $1 == "mount" ]
-		then sshfs -p 8022 -o IdentityFile=$PHONE_KEY $PHONE_IP:$2 $3
-	elif [ $1 == "scan" ]
-		then updateIP "Manually"
-	else
+		;;
+	cp-set)
+		eval "$PHONE_SSH termux-clipboard-set '$2'" &
+		;;
+	cp-get)
+		$PHONE_SSH termux-clipboard-get
+		;;
+	pull)
+		scp -P 8022 -i $PHONE_KEY $PHONE_IP:$2 $3
+		;;
+	push)
+		scp -P 8022 -i $PHONE_KEY $2 $PHONE_IP:$3
+		;;
+	share)
+		eval "$PHONE_SSH rm -rf ./tmp/*"
+		scp -P 8022 -i $PHONE_KEY $2 $PHONE_IP:./tmp/
+		eval "$PHONE_SSH termux-share -a send ./tmp/*"
+		;;
+	mount)
+		sshfs -p 8022 -o IdentityFile=$PHONE_KEY $PHONE_IP:$2 $3
+		;;
+	scan)
+		updateIP "Manually"
+		;;
+	*)
 		echo "Mini Termux Controller - github/Kebablord
 
 scan                *  update phone's ip,u can use it if you encounter a problem
@@ -55,5 +61,5 @@ push  <src> <dest>  -  push the file to phone dest from local src
 share <src>         -  Android's share menu prompts for specific string or file
 mount <src> <dest>  -  use SSHFS to mount specific android folder to linux folder
 "
-	fi
-fi
+	;;
+esac
