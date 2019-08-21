@@ -1,4 +1,4 @@
-PHONE_MAC=<YOUR_PHONE'S_MAC_ADRESS> # Mac adresses are static
+PHONE_MAC=<YOUR_PHONES_MAC_ADRESS> # Mac adresses are static
 PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connect to phone
 
 if [ -z $PHONE_IP ]
