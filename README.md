@@ -1,11 +1,11 @@
 # Mini Termux SSH Controller Script
 
 ```
-λ termux --help
+λ ./termux-mini.sh --help
 Mini Termux Controller - github/Kebablord
-scan		    *  scan's ports to find phone's ip adress
-cp-set <string>     -  copies the string to phone's clipboard
-cp-get              -  return the string from phone's clipboard
+scan		    *  scans ports to find phones ip adress
+cp-set <string>     -  copies the string to phone clipboard
+cp-get              -  returns the string from phone clipboard
 pull  <src> <dest>  -  pull the file from phone src to dest
 push  <src> <dest>  -  push the file to phone dest from local src
 share <src>         -  Android's share menu prompts for specific string or file
