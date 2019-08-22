@@ -1,31 +1,26 @@
 #!/usr/bin/bash
-PHONE_MAC="<YOUR_PHONES_MAC_ADRESS>" # Mac adresses are static
-PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connect to phone
+PHONE_MAC="<YOUR_PHONES_MAC_ADRESS>" # Unlike local IP,Mac adresses are static, so we will be using it to find the IP
+PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connecting to phone via ssh
 
-updateIP() { #GET IP ADRESS OF THE PHONE FROM BELOW MAC ADRESS
-    printf "$1 updating the ip adress...\r"
+MACtoIP() { #GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
+    printf "$1 updating the ip adress...\r" # $1 is the reason as parameter
     nmap -sn 192.168.1.0/24>/dev/null
     PHONE_IP=`for ((i=1; i<=255; i++));do arp -a 192.168.1.$i; done | grep $PHONE_MAC | awk '{print $2}' | sed -e 's/(//' -e 's/)//'`
     echo $PHONE_IP>/tmp/phone_ip.tmp
-    printf "Updated!                                               \n"
+    printf "Updated! Current phone ip is: $PHONE_IP              \n"
 }
 
-if [ -e /tmp/phone_ip.tmp ]
-    then
-        PHONE_IP=`cat /tmp/phone_ip.tmp`
-        if [[ `arp -a $PHONE_IP` == *'no'* ]]    # if ip is unavailable
-            then updateIP "Renewing needed,"
-        fi
-    else                                      
-        updateIP "Launching for the first time," # if no ip saved before
+if [ -e /tmp/phone_ip.tmp ] # Check if previous tmp file exists
+    then PHONE_IP=`cat /tmp/phone_ip.tmp`
+else
+    MACtoIP "Launching for the first time,"
 fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
 
 case $1 in
-    connect)
-        printf "Connecting to SSH...\r"
-        eval $PHONE_SSH
+    run)
+        eval "$PHONE_SSH ${@:2}"
         ;;
     cp-set)
         eval "$PHONE_SSH termux-clipboard-set '$2'" &
@@ -48,12 +43,13 @@ case $1 in
         sshfs -p 8022 -o IdentityFile=$PHONE_KEY $PHONE_IP:$2 $3
         ;;
     scan)
-        updateIP "Manually"
+        MACtoIP "Manually"
         ;;
     *)
         echo "Mini Termux Controller - github/Kebablord
 
-scan                *  update phone's ip,u can use it if you encounter a problem
+scan                *  scan for phone's ip,useful if you encounter a problem
+run <param>         -  run ssh command or connect ssh terminal if no arg passed
 cp-set <string>     -  copies the string to phone's clipboard
 cp-get              -  return the string from phone's clipboard
 pull  <src> <dest>  -  pull the file from phone src to dest
