@@ -12,8 +12,8 @@ MACtoIP() { #GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
 
 if [ -e /tmp/phone_ip.tmp ] # Check if previous tmp file exists
     then PHONE_IP=`cat /tmp/phone_ip.tmp`
-else
-    MACtoIP "Launching for the first time,"
+elif [ $1 != "scan" ]
+    then MACtoIP "Launching for the first time,"
 fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
