@@ -1,19 +1,19 @@
 #!/usr/bin/bash
-PHONE_MAC="<YOUR_PHONES_MAC_ADRESS>" # Unlike local IP,Mac adresses are static, so we will be using it to find the IP
-PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connecting to phone via ssh
+PHONE_MAC="<YOUR_PHONES_MAC_ADRESS>" # Mac adresses are static
+PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connect to phone
 
 MACtoIP() { #GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
     printf "$1 updating the ip adress...\r" # $1 is the reason as parameter
     nmap -sn 192.168.1.0/24>/dev/null
     PHONE_IP=`for ((i=1; i<=255; i++));do arp -a 192.168.1.$i; done | grep $PHONE_MAC | awk '{print $2}' | sed -e 's/(//' -e 's/)//'`
-    echo $PHONE_IP>/tmp/phone_ip.tmp
+    echo $PHONE_IP>/home/owo/.local/phone_ip.tmp
     printf "Updated! Current phone ip is: $PHONE_IP              \n"
 }
 
-if [ -e /tmp/phone_ip.tmp ] # Check if previous tmp file exists
-    then PHONE_IP=`cat /tmp/phone_ip.tmp`
+if [ -e /home/owo/.local/phone_ip.tmp ] # Check if previous tmp file exists
+    then PHONE_IP=`cat /home/owo/.local/phone_ip.tmp`
 elif [ $1 != "scan" ]
-    then MACtoIP "Launching for the first time,"
+	then MACtoIP "Launching for the first time,"
 fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
@@ -45,13 +45,20 @@ case $1 in
     scan)
         MACtoIP "Manually"
         ;;
+    sms)
+        termux run su -c cp /data/data/com.textra/databases/messaging.db /sdcard/tmp/sms.db
+	termux pull  /sdcard/tmp/sms.db /tmp/ >/dev/null
+	sqlite3 -line /tmp/sms.db 'select text from messages order by _id desc limit 1' |
+	awk -F " = " '{print $2}'
+	;;
     *)
         echo "Mini Termux Controller - github/Kebablord
 
-scan                *  scan for phone's ip,useful if you encounter a problem
+scan                *  scan for phone's ip,useful if you encounter a problem 
 run <param>         -  run ssh command or connect ssh terminal if no arg passed
 cp-set <string>     -  copies the string to phone's clipboard
 cp-get              -  return the string from phone's clipboard
+sms		    -  display latest sms (useful for verification codes)
 pull  <src> <dest>  -  pull the file from phone src to dest
 push  <src> <dest>  -  push the file to phone dest from local src
 share <src>         -  Android's share menu prompts for specific string or file
