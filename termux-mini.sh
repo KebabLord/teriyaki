@@ -5,12 +5,12 @@ PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connect to phone
 MACtoIP() { #GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
     printf "$1 updating the ip adress...\r" # $1 is the reason as parameter
     PHONE_IP=$(sudo arp-scan -l | grep $PHONE_MAC | awk '{print $1}')
-    echo $PHONE_IP>/home/owo/.local/phone_ip.tmp
+    echo $PHONE_IP>$HOME/.local/phone_ip.tmp
     printf "Updated! Current phone ip is: $PHONE_IP              \n"
 }
 
-if [ -e /home/owo/.local/phone_ip.tmp ] # Check if previous tmp file exists
-    then PHONE_IP=`cat /home/owo/.local/phone_ip.tmp`
+if [ -e $HOME/.local/phone_ip.tmp ] # Check if previous tmp file exists
+    then PHONE_IP=`cat $HOME/.local/phone_ip.tmp`
 elif [ $1 != "scan" ]
     then MACtoIP "Launching for the first time,"
 fi
