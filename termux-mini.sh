@@ -1,18 +1,26 @@
-#!/usr/bin/bash
-PHONE_MAC="<YOUR_PHONES_MAC_ADRESS>" # Mac adresses are static
-PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>" # Secret key to use while connect to phone
+#!/bin/bash
+PHONE_MAC="<YOUR_PHONES_MAC_ADRESS>"   # You can get phone's mac adress from status section in android settings.
+PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>"   # SSH secret key to use while connecting to phone.
 
-MACtoIP() { #GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
-    printf "$1 updating the ip adress...\r" # $1 is the reason as parameter
+
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+MACtoIP() { # GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
+    printf "Updating the IP adress...\r"
     PHONE_IP=$(sudo arp-scan -l | grep $PHONE_MAC | awk '{print $1}')
-    echo $PHONE_IP>$HOME/.local/phone_ip.tmp
-    printf "Updated! Current phone ip is: $PHONE_IP              \n"
+    if [ -v $PHONE_IP ]; then
+        echo "Couldn't find device's ip adress. Make sure it's connected to network and try again while phone screen is on."
+        exit 127
+    fi
+    echo $PHONE_IP>$SCRIPTPATH/phone_ip.log
+    echo -en "[\e[2K"; printf "Updated! Current phone ip is: $PHONE_IP \n"
 }
 
-if [ -e $HOME/.local/phone_ip.tmp ] # Check if previous tmp file exists
-    then PHONE_IP=`cat $HOME/.local/phone_ip.tmp`
+if [ -e $SCRIPTPATH/phone_ip.log ] # Check if previous tmp file exists
+    then PHONE_IP=`cat $SCRIPTPATH/phone_ip.log`
 elif [ $1 != "scan" ]
-    then MACtoIP "Launching for the first time,"
+    then echo "No ip log found, run 'sudo ./termux-mini.sh scan' first."; exit 1
 fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
@@ -22,7 +30,7 @@ case $1 in
         eval "$PHONE_SSH ${@:2}"
         ;;
     cp-set)
-        eval "$PHONE_SSH termux-clipboard-set '$2'" &
+        eval "$PHONE_SSH termux-clipboard-set '$2'"
         ;;
     cp-get)
         $PHONE_SSH termux-clipboard-get
@@ -42,11 +50,16 @@ case $1 in
         sshfs -p 8022 -o IdentityFile=$PHONE_KEY $PHONE_IP:$2 $3
         ;;
     scan)
-        MACtoIP "Manually"
+        if [ `id -u` -ne 0 ]
+        then
+          echo Scanning IP option requires root access, please run as root. 1>&2
+          exit 1
+        fi
+        MACtoIP
         ;;
     sms)
-        termux run su -c cp /data/data/com.textra/databases/messaging.db /sdcard/tmp/sms.db
-        termux pull  /sdcard/tmp/sms.db /tmp/ >/dev/null
+        $SCRIPT run su -c cp /data/data/com.textra/databases/messaging.db /sdcard/tmp/sms.db
+        $SCRIPT pull  /sdcard/tmp/sms.db /tmp/ >/dev/null
         sqlite3 -line /tmp/sms.db 'select text from messages order by _id desc limit 1' |
         awk -F " = " '{print $2}'
         ;;
@@ -65,3 +78,4 @@ mount <src> <dest>  -  use SSHFS to mount specific android folder to linux folde
 "
     ;;
 esac
+
