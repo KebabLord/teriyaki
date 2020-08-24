@@ -20,7 +20,7 @@ MACtoIP() { # GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
 if [ -e $SCRIPTPATH/phone_ip.log ] # Check if previous tmp file exists
     then PHONE_IP=`cat $SCRIPTPATH/phone_ip.log`
 elif [ $1 != "scan" ]
-    then echo "No ip log found, run 'sudo ./termux-mini.sh scan' first."; exit 1
+    then echo "No ip log found, run 'sudo ./teriyaki scan' first."; exit 1
 fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
@@ -66,15 +66,15 @@ case $1 in
     *)
         echo "Mini Termux Controller - github/Kebablord
 
-scan                *  scan for phone's ip,useful if you encounter a problem 
-run <param>         -  run ssh command or connect ssh terminal if no arg passed
-cp-set <string>     -  copies the string to phone's clipboard
-cp-get              -  return the string from phone's clipboard
-sms                 -  display latest sms (useful for verification codes)
-pull  <src> <dest>  -  pull the file from phone src to dest
-push  <src> <dest>  -  push the file to phone dest from local src
-share <src>         -  Android's share menu prompts for specific string or file
-mount <src> <dest>  -  use SSHFS to mount specific android folder to linux folder
+scan                *  scan network to update phone's current IP adress
+run <param>         -  run ssh commands or connect ssh terminal if no arg passed
+cp-set <string>     -  copy the string to phone clipboard
+cp-get              -  return the string from phone clipboard
+sms                 -  display latest sms, useful for verification codes (root)
+pull  <src> <dest>  -  pull the file from phone to computer
+push  <src> <dest>  -  push the file to phone from computer
+share <src>         -  share the media from computer to phone apps like whatsapp, telegram
+mount <src> <dest>  -  use SSHFS to mount specific phone folder to linux folder
 "
     ;;
 esac
