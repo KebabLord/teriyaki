@@ -19,7 +19,7 @@ mount <src> <dest>  -  use SSHFS to mount specific phone folder to linux folder
 Dependencies without asterisk are optional for their regarded options.
 
 #### PC side
-- **arp-scan***  - for scanning phone's IP adress from it's MAC
+- **nmap***  - for scanning phone's IP adress from it's MAC
 - **ssh***  - core of whole script
 - **sshfs**  - for mounting folder option
 - **sqlite3**  - for sms option, parsing the sms databases

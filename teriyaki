@@ -7,10 +7,11 @@ SCRIPT=`realpath $0`
 SCRIPTPATH=`dirname $SCRIPT`
 
 MACtoIP() { # GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
-    printf "Updating the IP adress...\r"
-    PHONE_IP=$(sudo arp-scan -l | grep $PHONE_MAC | awk '{print $1}')
+    printf "$1 updating the ip adress...\r" # $1 is the reason string ("manually" / "automatically")
+    nmap -p 8022 192.168.1.0/24>/dev/null
+    PHONE_IP=`for ((i=1; i<=255; i++));do arp -a 192.168.1.$i; done | grep $PHONE_MAC | awk '{print $2}' | sed -e 's/(//' -e 's/)//'`
     if [ -v $PHONE_IP ]; then
-        echo "Couldn't find device's ip adress. Make sure it's connected to network and try again while phone screen is on."
+        echo "Couldn't find device's ip adress. Make sure it's connected to network or try again while phone screen is on."
         exit 127
     fi
     echo $PHONE_IP>$SCRIPTPATH/phone_ip.log
@@ -20,7 +21,7 @@ MACtoIP() { # GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
 if [ -e $SCRIPTPATH/phone_ip.log ] # Check if previous tmp file exists
     then PHONE_IP=`cat $SCRIPTPATH/phone_ip.log`
 elif [ $1 != "scan" ]
-    then echo "No ip log found, run 'sudo ./teriyaki scan' first."; exit 1
+	then MACtoIP "Automatically"
 fi
 
 PHONE_SSH="ssh $PHONE_IP -p 8022 -i $PHONE_KEY"
@@ -50,12 +51,7 @@ case $1 in
         sshfs -p 8022 -o IdentityFile=$PHONE_KEY $PHONE_IP:$2 $3
         ;;
     scan)
-        if [ `id -u` -ne 0 ]
-        then
-          echo Scanning IP option requires root access, please run as root. 1>&2
-          exit 1
-        fi
-        MACtoIP
+        MACtoIP "Manually"
         ;;
     sms)
         $SCRIPT run su -c cp /data/data/com.textra/databases/messaging.db /sdcard/tmp/sms.db
