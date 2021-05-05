@@ -22,7 +22,6 @@ Dependencies without asterisk are optional for their regarded options.
 - **arp-scan***  - for scanning phone's IP adress from it's MAC
 - **ssh***  - core of whole script
 - **sshfs**  - for mounting folder option
-- **sqlite3**  - for sms option, parsing the sms databases
 
 #### Termux side
 - `openssh*`

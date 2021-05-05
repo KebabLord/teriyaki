@@ -49,10 +49,7 @@ case $1 in
         printf "Updated! Current phone ip is: $PHONE_IP \n"
         ;;
     sms)
-        $script run su -c cp /data/data/com.textra/databases/messaging.db /sdcard/tmp/sms.db
-        $script pull  /sdcard/tmp/sms.db /tmp/ >/dev/null
-        sqlite3 -line /tmp/sms.db 'select text from messages order by _id desc limit 1' |
-        awk -F " = " '{print $2}'
+        $PHONE_SSH termux-sms-list -l 1 | jq -r '.[0]["body"]'
         ;;
     *)
         echo "Mini Termux Controller - github/Kebablord
