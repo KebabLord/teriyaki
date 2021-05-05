@@ -6,21 +6,10 @@ PHONE_KEY="~/.ssh/<YOUR_SECRET_KEY>"   # SSH secret key to use while connecting 
 script=$(realpath "$0")
 scriptpath=$(dirname "$script")
 
-MACtoIP() { # GETS THE CURRENT IP ADRESS OF PHONE FROM IT'S MAC ADRESS
-    printf "Updating the IP adress...\r"
-    phone_ip=$(sudo arp-scan -l | grep $PHONE_MAC | awk '{print $1}')
-    if [ -z "$phone_ip" ]; then
-        echo "Couldn't find device's ip adress. Make sure it's connected to network and try again while phone screen is on."
-        exit 127
-    fi
-    echo "$phone_ip">"$scriptpath"/phone_ip.log
-    echo -en "[\e[2K"; printf "Updated! Current phone ip is: %s \n" "$phone_ip"
-}
-
 if [ -e "$scriptpath"/phone_ip.log ] # Check if previous tmp file exists
     then phone_ip=$(cat "$scriptpath"/phone_ip.log)
 elif [ "$1" != "scan" ]
-    then echo "No ip log found, run 'sudo ./teriyaki scan' first."; exit 1
+    then echo "No ip log found, run 'teriyaki scan' first."; exit 1
 fi
 
 PHONE_SSH="ssh $phone_ip -p 8022 -i $PHONE_KEY"
@@ -50,12 +39,14 @@ case $1 in
         sshfs -p 8022 -o IdentityFile="$PHONE_KEY" "$phone_ip":"$2" "$3"
         ;;
     scan)
-        if [ "$(id -u)" -ne 0 ]
-        then
-          echo Scanning IP option requires root access, please run as root. 1>&2
-          exit 1
+        sudo test; printf "Updating the IP adress...\r"
+        PHONE_IP=$(sudo arp-scan -l | grep $PHONE_MAC | awk '{print $1}')
+        if [ -v $PHONE_IP ]; then
+            echo "Couldn't find device's ip adress. Make sure it's connected to network and try again while phone screen is on."
+            exit 127
         fi
-        MACtoIP
+        echo $PHONE_IP>$SCRIPTPATH/phone_ip.log
+        printf "Updated! Current phone ip is: $PHONE_IP \n"
         ;;
     sms)
         $script run su -c cp /data/data/com.textra/databases/messaging.db /sdcard/tmp/sms.db
