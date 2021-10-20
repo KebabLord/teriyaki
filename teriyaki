@@ -45,7 +45,7 @@ case $1 in
             echo "Couldn't find device's ip adress. Make sure it's connected to network and try again while phone screen is on."
             exit 127
         fi
-        echo $PHONE_IP>$SCRIPTPATH/phone_ip.log
+        echo $PHONE_IP>$scriptpath/phone_ip.log
         printf "Updated! Current phone ip is: $PHONE_IP \n"
         ;;
     sms)
