@@ -1,5 +1,5 @@
 # Mini Termux SSH Controller Script
-![preview](https://u.teknik.io/CMMqD.gif)
+![preview](https://i.imgur.com/OFTLlzZ.gif)
 
 ```
 λ ./teriyaki
